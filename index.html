@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Kieticuicu — Quét đáp án</title>
+<title>Kieticuicu — Tikitaka</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -11,9 +11,93 @@ body {
   background: linear-gradient(160deg, #06263d, #031a2c 60%, #020f1c);
   color: #e6f7ff; min-height: 100vh; overflow: hidden;
 }
+
+/* ========== TOP BAR ========== */
+#topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px;
+  background: linear-gradient(180deg, rgba(2,15,28,.9), rgba(2,15,28,0));
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+#topbar.hidden { display: none; }
+#topbar .tb-icon {
+  width: 34px; height: 34px; border-radius: 9px; object-fit: contain;
+  filter: drop-shadow(0 0 10px #38d6ff);
+  pointer-events: auto;
+}
+#topbar .tb-icon-fallback {
+  width: 34px; height: 34px; border-radius: 9px;
+  display: none; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #0a8fc4, #096a94);
+  color: #fff; font-weight: 800; font-size: 15px;
+  border: 2px solid #38d6ff; box-shadow: 0 0 12px rgba(56,214,255,.6);
+  pointer-events: auto;
+}
+#topbar .tb-title {
+  color: #38d6ff; font-weight: 800; font-size: 15px;
+  letter-spacing: 1px; text-shadow: 0 0 12px rgba(56,214,255,.6);
+  pointer-events: auto;
+}
+#topbar .tb-spacer { flex: 1; }
+
+#topbar .tb-status {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 10px;
+  background: rgba(2,15,28,.7);
+  border: 1px solid #0a5a7f; border-radius: 20px;
+  pointer-events: auto; cursor: pointer;
+  font-size: 12px; color: #a5d7ea;
+  transition: .15s;
+}
+#topbar .tb-status:hover {
+  border-color: #38d6ff;
+  box-shadow: 0 0 10px rgba(56,214,255,.55);
+}
+#topbar .tb-status .dot {
+  display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+  vertical-align: middle;
+}
+.dot.green  { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+.dot.yellow { background: #facc15; box-shadow: 0 0 6px #facc15; }
+.dot.red    { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+
+/* ========== LEGEND ========== */
+#legendPop {
+  position: fixed; top: 58px; right: 16px; z-index: 30;
+  background: linear-gradient(160deg, #06263d, #031a2c);
+  border: 2px solid #0a8fc4; border-radius: 12px;
+  box-shadow: 0 0 24px rgba(10,180,240,.55);
+  padding: 12px 14px; min-width: 210px;
+  display: none; font-size: 13px;
+  animation: popIn .15s ease-out;
+}
+#legendPop.show { display: block; }
+@keyframes popIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+#legendPop h3 {
+  color: #38d6ff; font-size: 13px; font-weight: 800;
+  letter-spacing: .5px; margin-bottom: 10px;
+  padding-bottom: 8px; border-bottom: 1px solid #0a5a7f;
+  text-align: center;
+}
+#legendPop .lg-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 4px; border-radius: 6px;
+}
+#legendPop .lg-row + .lg-row { border-top: 1px dashed #0a3a52; }
+#legendPop .lg-row .dot { width: 12px; height: 12px; flex-shrink: 0; }
+#legendPop .lg-row .lg-key { font-weight: 800; color: #e6f7ff; min-width: 70px; }
+#legendPop .lg-row .lg-desc { color: #a5d7ea; font-size: 12px; }
+
+/* ========== LANDING ========== */
 #landing {
   position: fixed; inset: 0; display: flex; align-items: center;
   justify-content: center; padding: 20px; z-index: 10;
+  padding-top: 60px;
 }
 .card {
   background: linear-gradient(160deg, #0a3a5c, #041d30);
@@ -41,6 +125,7 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px;
   border-top: 1px dashed #0a5a7f; color: #5fa8c4;
   font-size: 12px; line-height: 1.5; }
 .note b { color: #4ade80; }
+
 #viewer {
   display: none; position: fixed; inset: 0; width: 100%; height: 100%;
   border: none; background: #fff; z-index: 1;
@@ -53,29 +138,61 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px;
   h1 { font-size: 26px; }
   .logo { width: 64px; height: 64px; }
   .upload-btn { padding: 16px 20px; font-size: 15px; }
+  #topbar .tb-title { display: none; }
+  #legendPop { right: 10px; left: 10px; min-width: 0; }
 }
 </style>
 </head>
 <body>
 
+<!-- ============ TOP BAR ============ -->
+<div id="topbar">
+  <img class="tb-icon" src="img/icon.png" alt=""
+       onerror="this.style.display='none';document.getElementById('tbFallback').style.display='flex'">
+  <div class="tb-icon-fallback" id="tbFallback">KI</div>
+  <span class="tb-title">Kieticuicu</span>
+  <span class="tb-spacer"></span>
+  <span class="tb-status" id="tbStatus" title="Xem chú thích trạng thái">
+    <span class="dot green"></span>
+    <span class="dot yellow"></span>
+    <span class="dot red"></span>
+    <span style="margin-left:2px;font-weight:700">Status</span>
+  </span>
+</div>
+
+<!-- ============ LEGEND ============ -->
+<div id="legendPop">
+  <h3>CHÚ THÍCH TRẠNG THÁI</h3>
+  <div class="lg-row"><span class="dot green"></span>
+    <span class="lg-key">Good</span>
+    <span class="lg-desc">Hoạt động bình thường</span></div>
+  <div class="lg-row"><span class="dot yellow"></span>
+    <span class="lg-key">NoTest</span>
+    <span class="lg-desc">Chưa kiểm tra</span></div>
+  <div class="lg-row"><span class="dot red"></span>
+    <span class="lg-key">Error</span>
+    <span class="lg-desc">Gặp lỗi</span></div>
+</div>
+
+<!-- ============ LANDING ============ -->
 <div id="landing">
   <div class="card">
     <img class="logo" src="img/icon.png" alt="" onerror="this.style.display='none'">
     <h1>Kieticuicu</h1>
-    <p class="sub">Version1.0.0</p>
+    <p class="sub">Version 1.1.3</p>
     <label class="upload-btn">
-      📁 CHỌN FILE HTML BÀI THI
+      📁 CHỌN FILE HTML
       <input type="file" id="fileInput" accept=".html,.htm">
     </label>
-    <p class="hint">Rem is never die</p>
-    <p class="note">@KTG2105</b>.</p>
+    <p class="hint">スバルくんは、レムのヒーローなんです。</p>
+    <p class="note">@KTG2105.</p>
   </div>
 </div>
 
 <iframe id="viewer"></iframe>
 
 <!-- ============================================================
-     TOOL CODE — Lưu dưới dạng text
+     TOOL CODE
      ============================================================ -->
 <script type="text/plain" id="toolSrc">
 (function () {
@@ -87,8 +204,39 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px;
 
   const state = {
     auto: false, watcher: null, lastIdx: null, logOn: false, logLines: [],
-    panel: null, launch: null, hideTimer: null, isHidden: false
+    panel: null, launch: null, hideTimer: null, isHidden: false,
+    sendEndpoint: window.__kiSendEndpoint || '',
+    scoreFields: null,
+    modal: null,
+    statuses: {}
   };
+
+  const DEFAULT_STATUS = {
+    scanOne:   'green',
+    scanAll:   'green',
+    fillOne:   'yellow',
+    fillAll:   'yellow',
+    auto:      'yellow',
+    log:       'yellow',
+    sendScore: 'yellow'
+  };
+
+  function setStatus(act, color) {
+    state.statuses[act] = color;
+    if (state.panel) {
+      const btn = state.panel.querySelector('[data-act="' + act + '"]');
+      if (btn) {
+        const d = btn.querySelector('.dot');
+        if (d) {
+          d.classList.remove('green','yellow','red');
+          d.classList.add(color);
+          d.title = color === 'green' ? 'Good — Hoạt động'
+                  : color === 'red'   ? 'Error — Lỗi'
+                                      : 'NoTest — Chưa kiểm tra';
+        }
+      }
+    }
+  }
 
   function log(msg, type) {
     type = type || 'INFO';
@@ -257,14 +405,12 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px;
   function autoFillAll() {
     const domData = findDataFromDOM();
     if (!domData) return { error: 'Không tìm thấy câu hỏi' };
-    let count = 0;
     const results = [];
     domData.forEach(function(item, i) {
       const correctEls = item.opts.filter(function(o) { return o.is_correct; }).map(function(o) { return o.el; });
       if (correctEls.length) {
         correctEls.forEach(function(el) { try { el.click(); } catch (e) {} });
         results.push({ num: i + 1, type: 'Đã chọn', rows: [['Đáp án', correctEls.map(function(e) { const b = e.querySelector('.opt-badge'); return b ? b.textContent.trim() : '?'; }).join(', ')]] });
-        count++;
       }
     });
     return { items: results, total: domData.length };
@@ -299,6 +445,183 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px;
     }
   }
 
+  /* ============================================================
+     GỬI ĐIỂM
+     ============================================================ */
+  function getScoreFields() {
+    if (Array.isArray(window.__kiScoreFields) && window.__kiScoreFields.length) {
+      return window.__kiScoreFields;
+    }
+    return [
+      { key: 'name',     label: 'Họ tên',     type: 'text',     required: true,  placeholder: 'Nguyễn Văn A' },
+      { key: 'class_id', label: 'Lớp / ID',   type: 'text',     required: false, placeholder: '12A1 / 001' },
+      { key: 'score',    label: 'Điểm',       type: 'number',   required: true,  placeholder: '0' },
+      { key: 'note',     label: 'Ghi chú',    type: 'textarea', required: false, placeholder: 'Tuỳ chọn...' }
+    ];
+  }
+
+  function autoCollectScore() {
+    try {
+      if (typeof window.__kiGetScore === 'function') {
+        const v = window.__kiGetScore();
+        if (v && typeof v === 'object') return v;
+        if (typeof v === 'number') return { score: v };
+      }
+    } catch (e) {}
+    return {};
+  }
+
+  function buildPayload(values) {
+    const base = {
+      time: new Date().toLocaleString('vi-VN'),
+      createdAt: new Date().toISOString(),
+      url: location.href,
+      ua: navigator.userAgent
+    };
+    return Object.assign(base, autoCollectScore(), values);
+  }
+
+  async function doSendScore(values) {
+    const payload = buildPayload(values);
+    if (typeof window.__kiOnSendScore === 'function') {
+      try {
+        const r = await Promise.resolve(window.__kiOnSendScore(payload));
+        if (r === undefined || r === null) return { ok: true };
+        return r;
+      } catch (e) {
+        return { ok: false, error: 'Hook __kiOnSendScore lỗi: ' + e.message };
+      }
+    }
+    const endpoint = state.sendEndpoint || window.__kiSendEndpoint || '';
+    if (!endpoint) {
+      return { ok: false, error: 'Chưa cấu hình endpoint. Set window.__kiSendEndpoint hoặc định nghĩa __kiOnSendScore.' };
+    }
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) return { ok: false, error: 'HTTP ' + res.status };
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, error: 'Fetch lỗi: ' + e.message };
+    }
+  }
+
+  function ensureScoreModal() {
+    if (state.modal) return state.modal;
+    injectStyle();
+    const overlay = document.createElement('div');
+    overlay.id = '__ki_score_modal';
+    overlay.innerHTML =
+      '<div class="ki-sbox">' +
+        '<h2>📤 GỬI ĐIỂM</h2>' +
+        '<div class="ki-sfields"></div>' +
+        '<div class="ki-smsg"></div>' +
+        '<div class="ki-sactions">' +
+          '<button class="ki-scancel">Hủy</button>' +
+          '<button class="ki-ssend">Gửi</button>' +
+        '</div>' +
+      '</div>';
+
+    const fieldsWrap = overlay.querySelector('.ki-sfields');
+    const fields = getScoreFields();
+
+    fields.forEach(function(f) {
+      const wrap = document.createElement('div');
+      wrap.className = 'ki-sfield';
+      const lbl = document.createElement('label');
+      lbl.textContent = f.label + (f.required ? ' *' : '');
+      wrap.appendChild(lbl);
+      let input;
+      if (f.type === 'textarea') {
+        input = document.createElement('textarea');
+        input.rows = 3;
+      } else {
+        input = document.createElement('input');
+        input.type = f.type || 'text';
+        if (f.type === 'number') { input.step = '0.01'; input.inputMode = 'decimal'; }
+      }
+      input.dataset.key = f.key;
+      if (f.placeholder) input.placeholder = f.placeholder;
+      input.autocomplete = 'off';
+      wrap.appendChild(input);
+      fieldsWrap.appendChild(wrap);
+    });
+
+    const tWrap = document.createElement('div');
+    tWrap.className = 'ki-sfield';
+    tWrap.innerHTML = '<label>Thời gian (tự động)</label>' +
+      '<input type="text" class="ki-stime" readonly>';
+    fieldsWrap.appendChild(tWrap);
+
+    const msg = overlay.querySelector('.ki-smsg');
+    overlay.querySelector('.ki-scancel').onclick = function() { overlay.classList.remove('show'); };
+    overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.classList.remove('show'); });
+
+    overlay.querySelector('.ki-ssend').onclick = async function() {
+      const sendBtn = this;
+      const values = {};
+      let firstError = null;
+      overlay.querySelectorAll('[data-key]').forEach(function(el) {
+        const key = el.dataset.key;
+        const val = (el.value || '').trim();
+        const f = fields.find(function(x){ return x.key === key; });
+        if (f && f.required && !val && !firstError) firstError = el;
+        values[key] = (f && f.type === 'number') ? (val === '' ? '' : Number(val)) : val;
+      });
+      if (firstError) {
+        msg.className = 'ki-smsg err';
+        msg.textContent = '⚠️ Vui lòng nhập đầy đủ trường bắt buộc';
+        firstError.focus(); return;
+      }
+      for (const k in values) {
+        const f = fields.find(function(x){ return x.key === k; });
+        if (f && f.type === 'number' && values[k] !== '' && isNaN(values[k])) {
+          msg.className = 'ki-smsg err';
+          msg.textContent = '⚠️ Trường "' + f.label + '" không hợp lệ';
+          return;
+        }
+      }
+      msg.className = 'ki-smsg';
+      msg.textContent = 'Đang gửi...';
+      sendBtn.disabled = true;
+      const r = await doSendScore(values);
+      sendBtn.disabled = false;
+      if (r && r.ok) {
+        setStatus('sendScore', 'green');
+        msg.className = 'ki-smsg ok';
+        msg.textContent = '✅ Gửi thành công!';
+        log('Gửi điểm thành công: ' + JSON.stringify(values), 'OK');
+        setTimeout(function(){ overlay.classList.remove('show'); }, 900);
+      } else {
+        setStatus('sendScore', 'red');
+        msg.className = 'ki-smsg err';
+        msg.textContent = '❌ ' + (r && r.error ? r.error : 'Gửi thất bại');
+        log('Gửi điểm thất bại: ' + (r && r.error), 'ERR');
+      }
+    };
+
+    (document.body || document.documentElement).appendChild(overlay);
+    state.modal = overlay;
+    return overlay;
+  }
+
+  function openScoreModal() {
+    const m = ensureScoreModal();
+    m.querySelector('.ki-stime').value = new Date().toLocaleString('vi-VN');
+    const msg = m.querySelector('.ki-smsg');
+    msg.className = 'ki-smsg'; msg.textContent = '';
+    m.classList.add('show');
+    const first = m.querySelector('input,textarea');
+    if (first) setTimeout(function(){ first.focus(); }, 40);
+  }
+  window.__kiOpenSendScore = openScoreModal;
+
+  /* ============================================================
+     UI
+     ============================================================ */
   function showLaunch() { state.isHidden = false; if (state.launch) state.launch.classList.remove('ki-hidden'); }
   function hideLaunch() { state.isHidden = true; if (state.launch) state.launch.classList.add('ki-hidden'); }
   function panelIsOpen() { return state.panel && state.panel.style.display === 'flex'; }
@@ -312,7 +635,60 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px;
     if (document.getElementById('__ki_style')) return;
     const css = document.createElement('style');
     css.id = '__ki_style';
-    css.textContent = '#__ki_launch{position:fixed!important;right:14px!important;bottom:14px!important;z-index:2147483647!important;width:52px!important;height:52px!important;border-radius:50%!important;border:2px solid #0a8fc4!important;background:linear-gradient(160deg,#06263d,#031a2c)!important;cursor:grab!important;box-shadow:0 0 16px rgba(10,180,240,.65)!important;touch-action:none!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;transition:opacity .45s ease,box-shadow .45s ease!important;opacity:1;-webkit-tap-highlight-color:transparent!important;user-select:none!important}#__ki_launch:active{cursor:grabbing!important}#__ki_launch img{width:78%!important;height:78%!important;object-fit:contain!important;pointer-events:none!important;user-select:none!important}#__ki_launch.ki-hidden{opacity:0!important;box-shadow:none!important;pointer-events:auto!important}#__ki_panel{position:fixed!important;z-index:2147483647!important;width:min(370px,calc(100vw - 20px))!important;max-height:78vh!important;overflow:hidden!important;background:linear-gradient(160deg,#06263d,#031a2c 60%,#020f1c)!important;color:#e6f7ff!important;border:2px solid #0a8fc4!important;border-radius:14px!important;box-shadow:0 0 26px rgba(10,180,240,.55)!important;font:14px Arial,sans-serif!important;display:none;flex-direction:column;box-sizing:border-box!important;padding:14px!important}#__ki_panel *{box-sizing:border-box}#__ki_panel .ki-head{display:flex;align-items:center;gap:8px;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid #0a7db0}#__ki_panel .ki-head img{width:26px;height:26px;border-radius:7px;box-shadow:0 0 8px rgba(56,214,255,.55);object-fit:contain}#__ki_panel .ki-head .ki-title{color:#38d6ff;font-size:17px;font-weight:700;letter-spacing:.4px;flex:1}#__ki_panel .ki-head .ki-status{font-size:11px;color:#7fc7e0}#__ki_panel .ki-trash{width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;border:1px solid #b93450;border-radius:7px;background:rgba(185,52,80,.15);color:#ff8ca6;font-size:15px;cursor:pointer;transition:.15s;flex-shrink:0}#__ki_panel .ki-trash:hover{background:#b93450;color:#fff}#__ki_panel .ki-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}#__ki_panel .ki-grid button{padding:11px 6px;border:1px solid #0a8fc4;border-radius:8px;background:rgba(10,143,196,.12);color:#7fe3ff;font-weight:700;cursor:pointer;transition:.15s;font-size:13px;font-family:inherit}#__ki_panel .ki-grid button:hover{background:rgba(10,143,196,.3);color:#c9f4ff}#__ki_panel .ki-grid button.on{background:#0a8fc4;color:#fff;box-shadow:0 0 10px rgba(10,180,240,.6)}#__ki_panel .ki-grid button.fill{background:rgba(74,222,128,.15);border-color:#16a34a;color:#4ade80}#__ki_panel .ki-grid button.fill:hover{background:rgba(74,222,128,.35)}#__ki_panel .ki-result{margin-top:10px;padding:10px;background:rgba(0,15,30,.6);border:1px solid #0a5a7f;border-radius:8px;max-height:320px;overflow:auto;font-size:13px}#__ki_panel .ki-q{margin-bottom:8px;padding-bottom:6px;border-bottom:1px dashed #0a3a52}#__ki_panel .ki-q .ki-t{color:#38d6ff;font-weight:700;margin-bottom:4px}#__ki_panel .ki-row{display:flex;justify-content:space-between;padding:3px 0;gap:8px}#__ki_panel .ki-row .k{color:#a5d7ea;flex-shrink:0}#__ki_panel .ki-row .v{color:#4ade80;font-weight:800;text-align:right;word-break:break-word}#__ki_panel .ki-err{color:#fb7185;padding:6px;text-align:center}#__ki_panel .ki-log{margin-top:8px;padding:8px;background:#020c16;border:1px solid #0a3a52;border-radius:8px;font:11px Consolas,monospace;max-height:180px;overflow:auto;display:none;color:#88ffc2}#__ki_panel .ki-log div{padding:1px 0;white-space:pre-wrap}';
+    css.textContent =
+      /* Launch button: vị trí ban đầu ở TRÊN CÙNG (top-right) */
+      '#__ki_launch{position:fixed!important;right:14px!important;top:14px!important;z-index:2147483647!important;width:52px!important;height:52px!important;border-radius:50%!important;border:2px solid #0a8fc4!important;background:linear-gradient(160deg,#06263d,#031a2c)!important;cursor:grab!important;box-shadow:0 0 16px rgba(10,180,240,.65)!important;touch-action:none!important;padding:0!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;transition:opacity .45s ease,box-shadow .45s ease!important;opacity:1;-webkit-tap-highlight-color:transparent!important;user-select:none!important}' +
+      '#__ki_launch:active{cursor:grabbing!important}' +
+      '#__ki_launch img{width:78%!important;height:78%!important;object-fit:contain!important;pointer-events:none!important;user-select:none!important}' +
+      '#__ki_launch.ki-hidden{opacity:0!important;box-shadow:none!important;pointer-events:auto!important}' +
+      '#__ki_panel{position:fixed!important;z-index:2147483647!important;width:min(370px,calc(100vw - 20px))!important;max-height:78vh!important;overflow:hidden!important;background:linear-gradient(160deg,#06263d,#031a2c 60%,#020f1c)!important;color:#e6f7ff!important;border:2px solid #0a8fc4!important;border-radius:14px!important;box-shadow:0 0 26px rgba(10,180,240,.55)!important;font:14px Arial,sans-serif!important;display:none;flex-direction:column;box-sizing:border-box!important;padding:14px!important}' +
+      '#__ki_panel *{box-sizing:border-box}' +
+      '#__ki_panel .ki-head{display:flex;align-items:center;gap:8px;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid #0a7db0}' +
+      '#__ki_panel .ki-head img{width:28px;height:28px;border-radius:7px;box-shadow:0 0 10px rgba(56,214,255,.65);object-fit:contain;flex-shrink:0}' +
+      '#__ki_panel .ki-head .ki-title{color:#38d6ff;font-size:17px;font-weight:700;letter-spacing:.4px;flex:1}' +
+      '#__ki_panel .ki-head .ki-status{font-size:11px;color:#7fc7e0}' +
+      '#__ki_panel .ki-trash{width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;border:1px solid #b93450;border-radius:7px;background:rgba(185,52,80,.15);color:#ff8ca6;font-size:15px;cursor:pointer;transition:.15s;flex-shrink:0}' +
+      '#__ki_panel .ki-trash:hover{background:#b93450;color:#fff}' +
+      '#__ki_panel .ki-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}' +
+      '#__ki_panel .ki-grid button{position:relative;padding:11px 6px;border:1px solid #0a8fc4;border-radius:8px;background:rgba(10,143,196,.12);color:#7fe3ff;font-weight:700;cursor:pointer;transition:.15s;font-size:13px;font-family:inherit}' +
+      '#__ki_panel .ki-grid button:hover{background:rgba(10,143,196,.3);color:#c9f4ff}' +
+      '#__ki_panel .ki-grid button.on{background:#0a8fc4;color:#fff;box-shadow:0 0 10px rgba(10,180,240,.6)}' +
+      '#__ki_panel .ki-grid button.fill{background:rgba(74,222,128,.15);border-color:#16a34a;color:#4ade80}' +
+      '#__ki_panel .ki-grid button.fill:hover{background:rgba(74,222,128,.35)}' +
+      '#__ki_panel .ki-grid button.send{grid-column:1 / -1;background:linear-gradient(160deg,#15803d,#166534);border-color:#4ade80;color:#fff}' +
+      '#__ki_panel .ki-grid button.send:hover{box-shadow:0 0 14px rgba(74,222,128,.7)}' +
+      '#__ki_panel .ki-grid .dot{position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:#facc15;box-shadow:0 0 6px currentColor}' +
+      '#__ki_panel .ki-grid .dot.green{background:#22c55e;color:#22c55e}' +
+      '#__ki_panel .ki-grid .dot.yellow{background:#facc15;color:#facc15}' +
+      '#__ki_panel .ki-grid .dot.red{background:#ef4444;color:#ef4444}' +
+      '#__ki_panel .ki-result{margin-top:10px;padding:10px;background:rgba(0,15,30,.6);border:1px solid #0a5a7f;border-radius:8px;max-height:320px;overflow:auto;font-size:13px}' +
+      '#__ki_panel .ki-q{margin-bottom:8px;padding-bottom:6px;border-bottom:1px dashed #0a3a52}' +
+      '#__ki_panel .ki-q .ki-t{color:#38d6ff;font-weight:700;margin-bottom:4px}' +
+      '#__ki_panel .ki-row{display:flex;justify-content:space-between;padding:3px 0;gap:8px}' +
+      '#__ki_panel .ki-row .k{color:#a5d7ea;flex-shrink:0}' +
+      '#__ki_panel .ki-row .v{color:#4ade80;font-weight:800;text-align:right;word-break:break-word}' +
+      '#__ki_panel .ki-err{color:#fb7185;padding:6px;text-align:center}' +
+      '#__ki_panel .ki-log{margin-top:8px;padding:8px;background:#020c16;border:1px solid #0a3a52;border-radius:8px;font:11px Consolas,monospace;max-height:180px;overflow:auto;display:none;color:#88ffc2}' +
+      '#__ki_panel .ki-log div{padding:1px 0;white-space:pre-wrap}' +
+      '#__ki_score_modal{position:fixed;inset:0;background:rgba(0,0,0,.78);display:none;z-index:2147483647;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:16px;font-family:Arial,sans-serif}' +
+      '#__ki_score_modal.show{display:flex}' +
+      '#__ki_score_modal .ki-sbox{width:min(440px,100%);max-height:88vh;overflow:auto;background:linear-gradient(160deg,#06263d,#031a2c);border:2px solid #0a8fc4;border-radius:16px;box-shadow:0 0 32px rgba(10,180,240,.55);padding:22px;color:#e6f7ff;box-sizing:border-box}' +
+      '#__ki_score_modal h2{color:#38d6ff;font-size:19px;margin:0 0 14px;text-shadow:0 0 12px rgba(56,214,255,.6);text-align:center}' +
+      '#__ki_score_modal .ki-sfield{margin-top:10px}' +
+      '#__ki_score_modal label{display:block;font-size:13px;color:#a5d7ea;margin-bottom:4px;font-weight:600}' +
+      '#__ki_score_modal input,#__ki_score_modal textarea{width:100%;padding:10px 12px;font-size:14px;background:rgba(2,15,28,.9);color:#e6f7ff;border:1px solid #0a5a7f;border-radius:8px;font-family:inherit;outline:none;transition:.15s;box-sizing:border-box}' +
+      '#__ki_score_modal input:focus,#__ki_score_modal textarea:focus{border-color:#38d6ff;box-shadow:0 0 8px rgba(56,214,255,.6)}' +
+      '#__ki_score_modal textarea{resize:vertical;min-height:60px}' +
+      '#__ki_score_modal .ki-smsg{margin-top:10px;font-size:13px;text-align:center;min-height:18px;color:#7fc7e0}' +
+      '#__ki_score_modal .ki-smsg.ok{color:#4ade80}' +
+      '#__ki_score_modal .ki-smsg.err{color:#fb7185}' +
+      '#__ki_score_modal .ki-sactions{margin-top:16px;display:flex;gap:10px}' +
+      '#__ki_score_modal .ki-sactions button{flex:1;padding:11px 14px;font-weight:700;font-size:14px;border-radius:8px;cursor:pointer;transition:.15s;font-family:inherit}' +
+      '#__ki_score_modal .ki-scancel{background:transparent;border:1px solid #b93450;color:#ff8ca6}' +
+      '#__ki_score_modal .ki-scancel:hover{background:#b93450;color:#fff}' +
+      '#__ki_score_modal .ki-ssend{background:linear-gradient(160deg,#15803d,#166534);border:1px solid #4ade80;color:#fff;box-shadow:0 0 10px rgba(74,222,128,.4)}' +
+      '#__ki_score_modal .ki-ssend:hover{box-shadow:0 0 20px rgba(74,222,128,.85)}' +
+      '#__ki_score_modal .ki-ssend:disabled{opacity:.55;cursor:not-allowed}';
     (document.head || document.documentElement).appendChild(css);
   }
 
@@ -322,8 +698,9 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px;
     const lr = l.getBoundingClientRect();
     const pw = p.offsetWidth || 370, ph = p.offsetHeight || 380;
     const vw = window.innerWidth, vh = window.innerHeight;
-    let left = lr.right - pw, top = lr.top - ph - 10;
-    if (top < 8) top = lr.bottom + 10;
+    // Panel mở xuống dưới launch (vì launch ở trên cùng)
+    let left = lr.right - pw, top = lr.bottom + 10;
+    if (top + ph > vh - 8) top = Math.max(8, lr.top - ph - 10);
     left = Math.max(8, Math.min(vw - pw - 8, left));
     top  = Math.max(8, Math.min(vh - ph - 8, top));
     p.style.setProperty('right', 'auto', 'important');
@@ -410,19 +787,24 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px;
 
     const p = document.createElement('div');
     p.id = '__ki_panel';
-    p.innerHTML = '<div class="ki-head">' +
-      (ICON_URL ? '<img src="' + ICON_URL + '" alt="" onerror="this.remove()">' : '') +
-      '<span class="ki-title">Kieticuicu</span>' +
-      '<span class="ki-status">Sẵn sàng</span>' +
-      '<button class="ki-trash" title="Dọn">🗑️</button>' +
-      '</div><div class="ki-grid">' +
-      '<button data-act="scanOne">QUÉT CÂU</button>' +
-      '<button data-act="scanAll">QUÉT TẤT CẢ</button>' +
-      '<button data-act="fillOne" class="fill">⚡ ĐIỀN CÂU</button>' +
-      '<button data-act="fillAll" class="fill">⚡ ĐIỀN HẾT</button>' +
-      '<button data-act="auto">AUTO: OFF</button>' +
-      '<button data-act="log">LOG: OFF</button>' +
-      '</div><div class="ki-result">Bấm QUÉT để bắt đầu.</div><div class="ki-log"></div>';
+    p.innerHTML =
+      '<div class="ki-head">' +
+        (ICON_URL ? '<img src="' + ICON_URL + '" alt="" onerror="this.remove()">' : '') +
+        '<span class="ki-title">Kieticuicu</span>' +
+        '<span class="ki-status">Sẵn sàng</span>' +
+        '<button class="ki-trash" title="Dọn">🗑️</button>' +
+      '</div>' +
+      '<div class="ki-grid">' +
+        '<button data-act="scanOne">QUÉT CÂU<span class="dot"></span></button>' +
+        '<button data-act="scanAll">QUÉT TẤT CẢ<span class="dot"></span></button>' +
+        '<button data-act="fillOne" class="fill">ĐIỀN CÂU<span class="dot"></span></button>' +
+        '<button data-act="fillAll" class="fill">ĐIỀN HẾT<span class="dot"></span></button>' +
+        '<button data-act="auto">AUTO: OFF<span class="dot"></span></button>' +
+        '<button data-act="log">LOG: OFF<span class="dot"></span></button>' +
+        '<button data-act="sendScore" class="send">Bypass Điểm<span class="dot"></span></button>' +
+      '</div>' +
+      '<div class="ki-result">Bấm QUÉT để bắt đầu.</div>' +
+      '<div class="ki-log"></div>';
     (document.body || document.documentElement).appendChild(p);
 
     p.querySelector('.ki-trash').onclick = function() { clearAll(); resetHideTimer(); };
@@ -432,8 +814,18 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px;
     p.querySelector('[data-act="fillAll"]').onclick = function() { renderResult(autoFillAll()); resetHideTimer(); };
     p.querySelector('[data-act="auto"]').onclick    = function() { toggleAuto(); resetHideTimer(); };
     p.querySelector('[data-act="log"]').onclick     = function() { toggleLog(); resetHideTimer(); };
+    p.querySelector('[data-act="sendScore"]').onclick = function() {
+      try { openScoreModal(); }
+      catch (e) { log('Không mở được modal gửi điểm: ' + e.message, 'ERR'); }
+      resetHideTimer();
+    };
 
     state.panel = p;
+
+    Object.keys(DEFAULT_STATUS).forEach(function(act) {
+      setStatus(act, DEFAULT_STATUS[act]);
+    });
+
     updateAutoBtn(); updateLogBtn(); renderLog();
     resetHideTimer();
     return p;
@@ -472,28 +864,47 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px;
   function updateAutoBtn() {
     if (!state.panel) return;
     const b = state.panel.querySelector('[data-act="auto"]');
-    if (b) { b.textContent = 'AUTO: ' + (state.auto ? 'ON' : 'OFF'); b.classList.toggle('on', state.auto); }
+    if (b) {
+      const dot = b.querySelector('.dot');
+      b.textContent = 'AUTO: ' + (state.auto ? 'ON' : 'OFF');
+      if (dot) b.appendChild(dot);
+      b.classList.toggle('on', state.auto);
+    }
   }
   function updateLogBtn() {
     if (!state.panel) return;
     const b = state.panel.querySelector('[data-act="log"]');
-    if (b) { b.textContent = 'LOG: ' + (state.logOn ? 'ON' : 'OFF'); b.classList.toggle('on', state.logOn); }
+    if (b) {
+      const dot = b.querySelector('.dot');
+      b.textContent = 'LOG: ' + (state.logOn ? 'ON' : 'OFF');
+      if (dot) b.appendChild(dot);
+      b.classList.toggle('on', state.logOn);
+    }
   }
 
   function boot() {
     ensureUI();
-    log('KieticuicuV1.1 đã sẵn sàng', 'OK');
+    log('Kieticuicu v1.1.3 đã sẵn sàng', 'OK');
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot);
   } else {
     boot();
   }
+
+  window.KiApi = {
+    setStatus: setStatus,
+    setScoreEndpoint: function(url) { state.sendEndpoint = url; },
+    setScoreFields: function(arr) { state.scoreFields = arr; },
+    openScoreModal: openScoreModal,
+    getLogs: function() { return state.logLines.slice(); },
+    log: log
+  };
 })();
 </script>
 
 <!-- ============================================================
-     APP CODE — Đọc file + nhúng tool
+     APP CODE
      ============================================================ -->
 <script>
 (function () {
@@ -502,10 +913,27 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px;
   const fileInput = document.getElementById('fileInput');
   const viewer    = document.getElementById('viewer');
   const landing   = document.getElementById('landing');
+  const topbar    = document.getElementById('topbar');
+  const legendPop = document.getElementById('legendPop');
 
   const ICON_URL = new URL('img/icon.png', location.href).href;
   const TOOL_CODE = document.getElementById('toolSrc').textContent;
 
+  /* ---------- Legend popup ---------- */
+  const tbStatus = document.getElementById('tbStatus');
+  if (tbStatus && legendPop) {
+    tbStatus.addEventListener('click', function(e) {
+      e.stopPropagation();
+      legendPop.classList.toggle('show');
+    });
+    document.addEventListener('click', function(e) {
+      if (!legendPop.contains(e.target) && e.target !== tbStatus) {
+        legendPop.classList.remove('show');
+      }
+    });
+  }
+
+  /* ---------- Load file ---------- */
   fileInput.addEventListener('change', async function(e) {
     const file = e.target.files && e.target.files[0];
     if (file) await loadFile(file);
@@ -525,7 +953,6 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px;
       alert('⚠️ Vui lòng chọn file .html hoặc .htm');
       return;
     }
-
     let html;
     try { html = await file.text(); }
     catch (err) { alert('❌ Không đọc được file: ' + err.message); return; }
@@ -539,6 +966,9 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px;
     else html += inject;
 
     landing.style.display = 'none';
+    // Ẩn topbar + legend khi đã nhúng file bài thi
+    topbar.classList.add('hidden');
+    legendPop.classList.remove('show');
     viewer.style.display = 'block';
     viewer.srcdoc = html;
 
