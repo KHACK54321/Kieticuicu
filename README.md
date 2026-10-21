@@ -1,4 +1,4 @@
-# Kieticuicu v1.2.5 
+# Kieticuicu v1.3.1
 # :)
 # Log:
-#   + skibidi 
+#   + Simple 
