@@ -137,7 +137,7 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px; margin-bottom: 6px; t
   <div class="card">
     <img class="logo" src="img/icon.png" alt="" onerror="this.style.display='none'">
     <h1>Kieticuicu</h1>
-    <p class="sub">Version 1.3.1</p>
+    <p class="sub">Version 1.3.2</p>
     <label class="upload-btn">
       📁 CHỌN FILE HTML BÀI THI
       <input type="file" id="fileInput" accept=".html,.htm">
@@ -190,33 +190,26 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px; margin-bottom: 6px; t
   }
 
   /* ============================================================
-     cleanText — LaTeX -> Unicode cho dễ đọc
+     cleanText — LaTeX -> Unicode
      ============================================================ */
   function cleanText(s) {
     if (s == null) return '';
     var t = String(s);
 
-    // 1. Bỏ HTML tags
     t = t.replace(/<[^>]*>/g, ' ');
-
-    // 2. Bỏ $ \[ \] \( \) và \\ (newline LaTeX)
     t = t.replace(/\$+|\\\[|\\\]|\\\(|\\\)/g, '');
     t = t.replace(/\\\\/g, ' ');
-
-    // 3. Bỏ lệnh định dạng không hiển thị
     t = t.replace(/\\left|\\right/g, '');
     t = t.replace(/\\limits|\\nolimits/g, '');
     t = t.replace(/\\displaystyle|\\textstyle|\\scriptstyle/g, '');
     t = t.replace(/\\quad|\\qquad/g, ' ');
     t = t.replace(/\\[,;:!]/g, ' ');
 
-    // 4. \mathbb{R} -> ℝ, ℕ, ℤ, ℚ, ℂ
     t = t.replace(/\\mathbb\{([A-Za-z])\}/g, function (_, c) {
       var bb = { R:'ℝ', N:'ℕ', Z:'ℤ', Q:'ℚ', C:'ℂ', P:'ℙ' };
       return bb[c.toUpperCase()] || c;
     });
 
-    // 5. \text, \mathrm, \vec, \overline… -> lấy nội dung trong ngoặc
     for (var r = 0; r < 2; r++) {
       t = t.replace(
         /\\(?:text|mathrm|mathbf|mathit|operatorname|vec|overline|widehat|widetilde|hat|bar|tilde|dot|ddot)\{([^{}]+)\}/g,
@@ -224,27 +217,20 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px; margin-bottom: 6px; t
       );
     }
 
-    // 6. \frac{a}{b} -> (a)/(b)
     for (var k = 0; k < 3; k++) {
       t = t.replace(/\\(?:d|t)?frac\{([^{}]+)\}\{([^{}]+)\}/g, '($1)/($2)');
     }
 
-    // 7. \sqrt[n]{a} -> (a)^(1/n); \sqrt{a} -> √(a)
     t = t.replace(/\\sqrt\[([^\]]+)\]\{([^{}]+)\}/g, '($2)^(1/$1)');
     t = t.replace(/\\sqrt\{([^{}]+)\}/g, '√($1)');
     t = t.replace(/\\sqrt/g, '√');
 
-    // 8. Chỉ số dưới / trên có ngoặc -> (…)
     t = t.replace(/_\{([^{}]+)\}/g, '_($1)');
     t = t.replace(/\^\{([^{}]+)\}/g, '^($1)');
 
-    // 9. Bỏ ngoặc nhóm toán học còn lại
     t = t.replace(/[{}]/g, '');
-
-    // 10. Ký tự escape \% \& \_ \#
     t = t.replace(/\\([%&_#])/g, '$1');
 
-    // 11. Map LaTeX -> Unicode
     var map = {
       '\\infty':'∞','\\pm':'±','\\mp':'∓','\\times':'×','\\div':'÷',
       '\\cdot':'·','\\ast':'∗',
@@ -275,7 +261,6 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px; margin-bottom: 6px; t
     };
     t = t.replace(/\\[a-zA-Z]+/g, function (m) { return map[m] || m.slice(1); });
 
-    // 12. Gộp khoảng trắng
     t = t.replace(/\s+/g, ' ').trim();
     return t;
   }
@@ -588,8 +573,17 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px; margin-bottom: 6px; t
       });
       (document.body || document.documentElement).appendChild(launch);
 
-      document.addEventListener('pointerdown', function () { resetHideTimer(); }, true);
-      document.addEventListener('keydown',     function () { resetHideTimer(); }, true);
+      /* v1.3.2 — CHỈ reveal khi click đúng vị trí icon ẩn.
+         Không còn reveal khi click bất kỳ đâu hay keydown. */
+      document.addEventListener('pointerdown', function (e) {
+        if (!state.launch || !state.isHidden) return;
+        var r = state.launch.getBoundingClientRect();
+        if (r.width === 0 || r.height === 0) return;
+        if (e.clientX >= r.left && e.clientX <= r.right &&
+            e.clientY >= r.top  && e.clientY <= r.bottom) {
+          resetHideTimer();
+        }
+      }, true);
     }
     state.launch = launch;
 
@@ -710,7 +704,7 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px; margin-bottom: 6px; t
   function boot() {
     try {
       ensureUI();
-      log('Kieticuicu v1.3.1 sẵn sàng', 'OK');
+      log('Kieticuicu v1.3.2 sẵn sàng', 'OK');
     } catch (e) {
       try { console.error('[Kieticuicu] boot error:', e); } catch (_) {}
     }
@@ -794,7 +788,7 @@ h1 { color: #38d6ff; font-size: 32px; letter-spacing: 1px; margin-bottom: 6px; t
     viewer.style.display = 'block';
     viewer.srcdoc = html;
 
-    console.log('[Kieticuicu] Đã nhúng tool vào HTML (v1.3.1)');
+    console.log('[Kieticuicu] Đã nhúng tool vào HTML (v1.3.2)');
   }
 })();
 </script>
